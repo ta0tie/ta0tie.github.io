@@ -64,106 +64,6 @@
       <div class="outer">
         <section id="main">
   
-    <article id="post-test-my-site" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2022/07/04/test-my-site/" class="article-date">
-  <time datetime="2022-07-04T11:19:12.000Z" itemprop="datePublished">2022-07-04</time>
-</a>
-    
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2022/07/04/test-my-site/">test_my_site</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h2 id="BUU-Crypto-rot"><a href="#BUU-Crypto-rot" class="headerlink" title="BUU-Crypto-rot"></a>BUU-Crypto-rot</h2><p>题目描述：</p>
-<p><img src="https://img2022.cnblogs.com/blog/2611658/202201/2611658-20220123211519981-1780109885.png" alt="image-20220108225409420"></p>
-<p>附件内容：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">破解下面的密文：</span><br><span class="line"></span><br><span class="line">83 89 78 84 45 86 96 45 115 121 110 116 136 132 132 132 108 128 117 118 134 110 123 111 110 127 108 112 124 122 108 118 128 108 131 114 127 134 108 116 124 124 113 108 76 76 76 76 138 23 90 81 66 71 64 69 114 65 112 64 66 63 69 61 70 114 62 66 61 62 69 67 70 63 61 110 110 112 64 68 62 70 61 112 111 112</span><br><span class="line"></span><br><span class="line">flag格式flag&#123;&#125;</span><br></pre></td></tr></table></figure>
-
-
-
-<p>题目名为<code>rot</code>，应该和位移密码有关，直接爆破一下。</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">list</span> = [<span class="number">83</span>,<span class="number">89</span>,<span class="number">78</span>,<span class="number">84</span>,<span class="number">45</span>,<span class="number">86</span>,<span class="number">96</span>,<span class="number">45</span>,<span class="number">115</span>,<span class="number">121</span>,<span class="number">110</span>,<span class="number">116</span>,<span class="number">136</span>,<span class="number">132</span>,<span class="number">132</span>,<span class="number">132</span>,<span class="number">108</span>,<span class="number">128</span>,<span class="number">117</span>,<span class="number">118</span>,<span class="number">134</span>,<span class="number">110</span>,<span class="number">123</span>,<span class="number">111</span>,<span class="number">110</span>,<span class="number">127</span>,<span class="number">108</span>,<span class="number">112</span>,<span class="number">124</span>,<span class="number">122</span>,<span class="number">108</span>,<span class="number">118</span>,<span class="number">128</span>,<span class="number">108</span>,<span class="number">131</span>,<span class="number">114</span>,<span class="number">127</span>,<span class="number">134</span>,<span class="number">108</span>,<span class="number">116</span>,<span class="number">124</span>,<span class="number">124</span>,<span class="number">113</span>,<span class="number">108</span>,<span class="number">76</span>,<span class="number">76</span>,<span class="number">76</span>,<span class="number">76</span>,<span class="number">138</span>,<span class="number">23</span>,<span class="number">90</span>,<span class="number">81</span>,<span class="number">66</span>,<span class="number">71</span>,<span class="number">64</span>,<span class="number">69</span>,<span class="number">114</span>,<span class="number">65</span>,<span class="number">112</span>,<span class="number">64</span>,<span class="number">66</span>,<span class="number">63</span>,<span class="number">69</span>,<span class="number">61</span>,<span class="number">70</span>,<span class="number">114</span>,<span class="number">62</span>,<span class="number">66</span>,<span class="number">61</span>,<span class="number">62</span>,<span class="number">69</span>,<span class="number">67</span>,<span class="number">70</span>,<span class="number">63</span>,<span class="number">61</span>,<span class="number">110</span>,<span class="number">110</span>,<span class="number">112</span>,<span class="number">64</span>,<span class="number">68</span>,<span class="number">62</span>,<span class="number">70</span>,<span class="number">61</span>,<span class="number">112</span>,<span class="number">111</span>,<span class="number">112</span>]</span><br><span class="line">c = <span class="string">&#x27;&#x27;</span></span><br><span class="line">fo = <span class="built_in">open</span>(<span class="string">&quot;foo.txt&quot;</span>, <span class="string">&quot;w&quot;</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> x <span class="keyword">in</span> <span class="built_in">range</span>(-<span class="number">20</span>,<span class="number">30</span>):</span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">list</span>:</span><br><span class="line">        c = c + <span class="built_in">chr</span>(i+x)</span><br><span class="line">    <span class="built_in">print</span>(c)</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&quot;\n----------------------------\n&quot;</span>)</span><br><span class="line">    c = <span class="string">&#x27;&#x27;</span></span><br></pre></td></tr></table></figure>
-
-<p>找到的有用信息：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">FLAG IS flag&#123;www_shiyanbar_com_is_very_good_????&#125;</span><br><span class="line">MD5:38e4c352809e150186920aac37190cbc</span><br></pre></td></tr></table></figure>
-
-<p>想着给了MD5应该问好就是MD5解密之后的东西吧，去网站上试了试没有结果。凉了，去看了大佬wp：<a target="_blank" rel="noopener" href="https://blog.csdn.net/YenKoc/article/details/105339541">buu 达芬奇 &amp;&amp; ROT_YenKoc的博客</a>。原来这个MD5应该是flag加密的结果哈，自己也写了脚本跑了跑：<code>flag&#123;www_shiyanbar_com_is_very_good_@8Mu&#125;</code></p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> hashlib</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">solve</span>():</span><br><span class="line">    <span class="keyword">for</span> a <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">33</span>,<span class="number">127</span>):</span><br><span class="line">        <span class="keyword">for</span> b <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">33</span>,<span class="number">127</span>):</span><br><span class="line">            <span class="keyword">for</span> c <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">33</span>,<span class="number">127</span>):</span><br><span class="line">                <span class="keyword">for</span> d <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">33</span>,<span class="number">127</span>):</span><br><span class="line">                    flag = <span class="string">&#x27;flag&#123;&#123;www_shiyanbar_com_is_very_good_&#123;&#125;&#123;&#125;&#123;&#125;&#123;&#125;      &#x27;</span>.<span class="built_in">format</span>(<span class="built_in">chr</span>(a),<span class="built_in">chr</span>(b),<span class="built_in">chr</span>(c),<span class="built_in">chr</span>(d))</span><br><span class="line">                    md5Flag = hashlib.md5()</span><br><span class="line">                    md5Flag.update(flag.encode(encoding=<span class="string">&#x27;utf-8&#x27;</span>))</span><br><span class="line">                    <span class="built_in">print</span>(flag+<span class="string">&#x27;\t&#x27;</span>+md5Flag.hexdigest())</span><br><span class="line">                    <span class="keyword">if</span> md5Flag.hexdigest()==<span class="string">&#x27;38e4c352809e150186920aac37190cbc&#x27;</span>:</span><br><span class="line">                        <span class="built_in">print</span>(flag)</span><br><span class="line">                        <span class="keyword">return</span> <span class="number">0</span></span><br><span class="line"></span><br><span class="line">solve()</span><br></pre></td></tr></table></figure>
-
-<hr>
-<h2 id="攻防世界-Crypto进阶区-Decrypt-the-Message"><a href="#攻防世界-Crypto进阶区-Decrypt-the-Message" class="headerlink" title="攻防世界-Crypto进阶区-Decrypt-the-Message"></a>攻防世界-Crypto进阶区-Decrypt-the-Message</h2><h3 id="Poem-Codes"><a href="#Poem-Codes" class="headerlink" title="Poem Codes"></a>Poem Codes</h3><p>参考文章：</p>
-<ul>
-<li><a target="_blank" rel="noopener" href="http://wmbriggs.com/post/1001/">Poem Codes – William M. Briggs (wmbriggs.com)</a></li>
-<li><a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Poem_code">Poem code - Wikipedia</a></li>
-</ul>
-<p>这种加密的特点是有一首诗。以如下的诗歌为例（为了方便大家对照Wiki百科这里就用wiki上的例子了）：<br>$$<br>\colorbox{yellow}{Twas}\ brillig,\ and\ \colorbox{yellow}{the}\ slithy\ \colorbox{yellow}{toves}\<br>Did\ gyre\ and\ gimble\ in\ the\ \colorbox{yellow}{wabe}:\<br>All\ mimsy\ were\ the\ borogoves,\<br>And\ the\ \colorbox{yellow}{mome}\ raths\ outgrabe.\<br>$$<br>首先需要从诗歌的任意位置抽取五个单词:<code>the</code>,<code>wabe</code>,<code>toves</code>,<code>twas</code>,<code>mome</code>。它们分别是这首诗歌的第<em>4,13,6,1,21</em>个单词，为方便接受密文者知道你挑选的是哪几个词和他们的顺序，这里需要生成一个提示词组：<code>DMFAU</code>（按照26个英文字母顺序，4即为D，13即为M,…）。</p>
-<p>然后将加密的单词中的字母依次排列好然后进行编号。编号规则为从a到z，从左到右依次编号，如果有两个相同字母则序号+1，然后继续排列。（说的再多不如直接看图来的快，应该能理解了吧）。</p>
-<p><img src="https://img2022.cnblogs.com/blog/2611658/202201/2611658-20220123211520286-1892764665.png" alt="image-20220110214550297"></p>
-<p>接着对信息<code>the operation to demolish the bunker is tomorrow at eleven rendezvous at six at farmer jacques</code>进行加密。将加密内容填入表格中，如果最后有空位的话可以随便填入不影响原文的内容如这里有一处空缺可以填入字母X使表格完整。</p>
-<p><img src="https://img2022.cnblogs.com/blog/2611658/202201/2611658-20220123211520593-625329732.png" alt="image-20220110220055844"></p>
-<p>然后将每一列的内容按照上面的标号抽出，这里应该为：<code>PELA DOZC EBET ...</code></p>
-<p>最后再开头加入提示词组<code>DMFAU</code>，组合起来就是密文了：<code>DMFAU PELAD OZCEB ETETT IRUVF OREEI OAXHH ASMOO ULRSS TKNRO RUENI NREMV QTSWT ANEAT SDJIE RMOHE XOTEA</code></p>
-<p>相信理解了加密过程解密过程就很好理解了吧。按照提示词组从诗中抽取出来单词并标号，然后再按照列号填入内容，最终顺次读取就是明文了。</p>
-<p>对于加解密也有大佬给出了脚本：<a target="_blank" rel="noopener" href="https://github.com/abpolym/crypto-tools/tree/master/poemcode">作者：polym (Tim)     crypto-tools/poemcode at master · abpolym/crypto-tools (github.com)</a></p>
-<h3 id="本题"><a href="#本题" class="headerlink" title="本题"></a>本题</h3><p>直接使用脚本就可以了。</p>
-<ul>
-<li>需要将你的诗歌和密文分成两个.txt文本</li>
-<li>必须把一些特殊的字符去掉，比如诗歌中的“.”，如果不去掉，运行的时候会报错：IndexError: list assignment index out of range</li>
-</ul>
-<p><img src="https://img2022.cnblogs.com/blog/2611658/202201/2611658-20220123211520860-880321820.png" alt="image-20220110222640386"></p>
-<p>在给出的结果中找到合适的:<code>ifyouthinkcryptographyistheanswertoyourproblemthenyoudonotknowwhatyourproblemisabcdefghijklmnopqrstu</code></p>
-<p><img src="https://img2022.cnblogs.com/blog/2611658/202201/2611658-20220123211521247-1345682167.png" alt="image-20220110223637739"></p>
-<hr>
-<h2 id="攻防世界-Crypto进阶区-equation-2"><a href="#攻防世界-Crypto进阶区-equation-2" class="headerlink" title="攻防世界-Crypto进阶区-equation-2"></a>攻防世界-Crypto进阶区-equation-2</h2><p>题目描述</p>
-<p><img src="https://img2022.cnblogs.com/blog/2611658/202201/2611658-20220123211521616-377370099.png" alt="image-20220110225036381"></p>
-<p>附件里有一张图片和一个flag文件</p>
-<p><img src="https://img2022.cnblogs.com/blog/2611658/202201/2611658-20220123211521901-1533666178.png" alt="image-20220110225216693"></p>
-<p><img src="https://img2022.cnblogs.com/blog/2611658/202201/2611658-20220123211522147-629765305.png" alt="mask"></p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">#图片内文本</span><br><span class="line">Os9mhOQRdqW2cwVrnNI72DLcAXpXUJ1HGwJBANWiJcDUGxZpnERxVw7s0913WXNt</span><br><span class="line">V4GqdxCzG0pG5EHThtoTRbyX0aqRP4U/hQ9tRoSoDmBn+3HPITsnbCy67VkCQBM4</span><br><span class="line">xZPTtUKM6Xi+16VTUnFVs9E4rqwIQCDAxn9UuVMBXlX2Cl0xOGUF4C5hItrX2woF</span><br><span class="line">7LVS5EizR63CyRcPovMCQQDVyNbcWD7N88MhZjujKuSrHJot7WcCaRmTGEIJ6TkU</span><br><span class="line">8NWt9BVjR4jVkZ2EqNd0KZWdQPukeynPcLlDEkIXyaQx</span><br></pre></td></tr></table></figure>
-
-<p>如图，给出了这个RSA的一部分私钥文件情况，那么我们就得对rsa的.pem文件结构有一定了解。</p>
-<h2 id="RSA-private-key-pem-文件格式"><a href="#RSA-private-key-pem-文件格式" class="headerlink" title="RSA private key pem 文件格式"></a>RSA private key pem 文件格式</h2><p>参考文章：</p>
-<ul>
-<li><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/45317622">RSA公钥文件解密密文的原理分析 - 知乎 (zhihu.com)</a></li>
-<li><a target="_blank" rel="noopener" href="https://www.cnblogs.com/gllxy/p/3365304.html">PEM文件 - gllxy - 博客园 (cnblogs.com)</a></li>
-</ul>
-<p><img src="https://img2022.cnblogs.com/blog/2611658/202201/2611658-20220123211522402-706982658.png" alt="image-20220111224938348"></p>
-<h3 id="本题-1"><a href="#本题-1" class="headerlink" title="本题"></a>本题</h3><p>对照可知本题已知信息如下：</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">q = <span class="number">0x0000000000000000000000000000000000000000000000000000000000000000000000000000003ACF6684E41176A5B673056B9CD23BD832DC017A57509D471B</span>   <span class="comment">#知道p末尾的部分信息</span></span><br><span class="line"></span><br><span class="line">dp = <span class="number">0xD5A225C0D41B16699C4471570EECD3DD7759736D5781AA7710B31B4A46E441D386DA1345BC97D1AA913F853F850F6D4684A80E6067FB71CF213B276C2CBAED59</span></span><br><span class="line"></span><br><span class="line">dq = <span class="number">0x1338C593D3B5428CE978BED7A553527155B3D138AEAC084020C0C67F54B953015E55F60A5D31386505E02E6122DAD7DB0A05ECB552E448B347ADC2C9170FA2F3</span></span><br><span class="line"></span><br><span class="line">qi = <span class="number">0xD5C8D6DC583ECDF3C321663BA32AE4AB1C9A2DED6702691993184209E93914F0D5ADF415634788D5919D84A8D77429959D40FBA47B29CF70B943124217C9A431</span></span><br></pre></td></tr></table></figure>
-
-<p>一般的RSA的e默认是<code>0x010001</code>的，不妨在这里猜测本题的e取值也是<code>0x010001</code>。</p>
-<p>然后又了解到一个关于dq(dp同理)的推论：<br>$$<br>e * dq === 1 (mod (q-1))\<br>e<em>dq-k</em>(q-1)=1\<br>e<em>dq-1=k</em>(q-1)\<br>\frac{e*dq-1}{k}+1=q<br>$$</p>
-<p>那么就可以通过对k的循环和对q的末尾信息来确定q的值，比起直接对q进行爆破范围更小速度更快。</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> sympy <span class="keyword">import</span> *</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">solve</span>():</span><br><span class="line">    dq = <span class="number">0x1338C593D3B5428CE978BED7A553527155B3D138AEAC084020C0C67F54B953015E55F60A5D31386505E02E6122DAD7DB0A05ECB552E448B347ADC2C9170FA2F3</span></span><br><span class="line">    e = <span class="number">0x10001</span></span><br><span class="line">    k = <span class="number">1</span></span><br><span class="line">    <span class="keyword">while</span>(<span class="number">1</span>):</span><br><span class="line">        q = <span class="built_in">int</span>((e*dq - <span class="number">1</span>)//k + <span class="number">1</span>)</span><br><span class="line">        <span class="keyword">if</span> (<span class="string">&quot;3acf6684e41176a5b673056b9cd23bd832dc017a57509d471b&quot;</span> <span class="keyword">in</span> <span class="built_in">str</span>(<span class="built_in">hex</span>(q))) <span class="keyword">and</span> isprime(q):</span><br><span class="line">            <span class="built_in">print</span>(<span class="string">&quot;k = %d\nq = %d&quot;</span>%(k,q))</span><br><span class="line">            <span class="keyword">return</span> <span class="number">0</span></span><br><span class="line">        k = k+<span class="number">1</span></span><br><span class="line"></span><br><span class="line">solve()</span><br><span class="line"></span><br><span class="line"><span class="string">&#x27;&#x27;&#x27;</span></span><br><span class="line"><span class="string">k = 5277</span></span><br><span class="line"><span class="string">q = 12502893634923161599824465146407069882228513776947707295476805997311776855879024002289593598657949783937041929668443115224477369136089557911464046118127387</span></span><br><span class="line"><span class="string">&#x27;&#x27;&#x27;</span></span><br></pre></td></tr></table></figure>
-
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://example.com/2022/07/04/test-my-site/" data-id="cl56q6a6900017cye24x5f6bc" class="article-share-link">Share</a>
-      
-      
-  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/test/" rel="tag">test</a></li></ul>
-
-    </footer>
-  </div>
-  
-</article>
-
-
-  
     <article id="post-hello-world" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
     <a href="/2022/07/04/hello-world/" class="article-date">
@@ -203,7 +103,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://example.com/2022/07/04/hello-world/" data-id="cl56q6a5s00007cye7bulfjda" class="article-share-link">Share</a>
+      <a data-url="http://example.com/2022/07/04/hello-world/" data-id="cl56qvhnv0000xoye6usr69l5" class="article-share-link">Share</a>
       
       
     </footer>
@@ -223,23 +123,9 @@
 
   
     
-  <div class="widget-wrap">
-    <h3 class="widget-title">Tags</h3>
-    <div class="widget">
-      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/test/" rel="tag">test</a></li></ul>
-    </div>
-  </div>
-
 
   
     
-  <div class="widget-wrap">
-    <h3 class="widget-title">Tag Cloud</h3>
-    <div class="widget tagcloud">
-      <a href="/tags/test/" style="font-size: 10px;">test</a>
-    </div>
-  </div>
-
   
     
   <div class="widget-wrap">
@@ -256,10 +142,6 @@
     <h3 class="widget-title">Recent Posts</h3>
     <div class="widget">
       <ul>
-        
-          <li>
-            <a href="/2022/07/04/test-my-site/">test_my_site</a>
-          </li>
         
           <li>
             <a href="/2022/07/04/hello-world/">Hello World</a>
