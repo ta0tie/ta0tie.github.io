@@ -201,6 +201,7 @@ document.addEventListener("pjax:success", e => {
     gsap.ticker.remove(render);
     setTimeout(() => {
       if (!peoplecanvasEl) return;
+      // 设置背景图片
       if (peopleConfig.background_image) {
         document.documentElement.style.setProperty('--peoplecanvas-bg-image', `url(${peopleConfig.background_image})`);
       }
