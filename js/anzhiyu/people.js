@@ -56,7 +56,9 @@ function _createClass(e, r, t) {
   return r && _defineProperties(e.prototype, r), t && _defineProperties(e, t), e;
 }
 var peopleConfig = {
-    src: GLOBAL_CONFIG.peoplecanvas.img,
+    src: Array.isArray(GLOBAL_CONFIG.peoplecanvas.img) 
+      ? GLOBAL_CONFIG.peoplecanvas.img[Math.floor(Math.random() * GLOBAL_CONFIG.peoplecanvas.img.length)]
+      : GLOBAL_CONFIG.peoplecanvas.img,
     background_image: GLOBAL_CONFIG.peoplecanvas.background_image || '',
     rows: GLOBAL_CONFIG.peoplecanvas.rows || 15,
     cols: GLOBAL_CONFIG.peoplecanvas.cols || 7,
