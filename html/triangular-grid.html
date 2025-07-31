@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>正三角形网格绘制器</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .controls {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .control-group {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        .control-group:last-child {
+            margin-bottom: 0;
+        }
+        label {
+            font-weight: bold;
+            min-width: 80px;
+        }
+        input[type="range"] {
+            flex: 1;
+            max-width: 300px;
+        }
+        .value-display {
+            min-width: 40px;
+            text-align: center;
+            font-weight: bold;
+            color: #333;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        .canvas-container {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 20px;
+            text-align: center;
+        }
+        canvas {
+            border: 2px solid #ddd;
+            cursor: crosshair;
+            max-width: 100%;
+            height: auto;
+            user-select: none;
+        }
+        .info {
+            margin-top: 10px;
+            color: #666;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>正三角形网格绘制器</h1>
+        
+        <div class="controls">
+            <div class="control-group">
+                <label for="density">网格密度:</label>
+                <input type="range" id="density" min="10" max="50" value="20">
+                <span class="value-display" id="densityValue">20</span>
+            </div>
+            
+            <div class="control-group">
+                <button id="clearBtn">清空画布</button>
+                <button id="resetViewBtn">重置视图</button>
+                <button id="exportBtn">导出SVG</button>
+            </div>
+        </div>
+        
+        <div class="canvas-container">
+            <canvas id="gridCanvas" width="800" height="600"></canvas>
+            <div class="info">
+                <strong>操作说明：</strong><br>
+                • 左键拖拽：涂黑/取消涂黑经过的三角形网格<br>
+                • 中键拖拽：移动画布视图<br>
+                • 调节密度：改变网格大小<br>
+                • 重新选择已涂黑的网格可将其重置为无色
+            </div>
+        </div>
+    </div>
+
+    <script>
+        class TriangleGrid {
+            constructor(canvasId) {
+                this.canvas = document.getElementById(canvasId);
+                this.ctx = this.canvas.getContext('2d');
+                this.density = 20;
+                this.filledTriangles = new Set();
+                
+                // 画布平移相关
+                this.offsetX = 0;
+                this.offsetY = 0;
+                this.isDragging = false;
+                this.isPainting = false;
+                this.lastX = 0;
+                this.lastY = 0;
+                this.dragStartX = 0;
+                this.dragStartY = 0;
+                this.paintedInCurrentDrag = new Set(); // 记录当前拖拽中已处理的三角形
+                
+                this.setupEventListeners();
+                this.draw();
+            }
+            
+            setupEventListeners() {
+                // 密度控制
+                const densitySlider = document.getElementById('density');
+                const densityValue = document.getElementById('densityValue');
+                
+                densitySlider.addEventListener('input', (e) => {
+                    this.density = parseInt(e.target.value);
+                    densityValue.textContent = this.density;
+                    this.draw();
+                });
+                
+                // 画布鼠标事件
+                this.canvas.addEventListener('mousedown', (e) => {
+                    this.handleMouseDown(e);
+                });
+                
+                this.canvas.addEventListener('mousemove', (e) => {
+                    this.handleMouseMove(e);
+                });
+                
+                this.canvas.addEventListener('mouseup', (e) => {
+                    this.handleMouseUp(e);
+                });
+                
+
+                
+                // 防止拖拽时选中文本
+                this.canvas.addEventListener('selectstart', (e) => {
+                    e.preventDefault();
+                });
+                
+                // 清空按钮
+                document.getElementById('clearBtn').addEventListener('click', () => {
+                    this.filledTriangles.clear();
+                    this.draw();
+                });
+                
+                // 重置视图按钮
+                document.getElementById('resetViewBtn').addEventListener('click', () => {
+                    this.offsetX = 0;
+                    this.offsetY = 0;
+                    this.draw();
+                });
+                
+                // 导出按钮
+                document.getElementById('exportBtn').addEventListener('click', () => {
+                    this.exportSVG();
+                });
+            }
+            
+            draw() {
+                this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+                
+                // 保存当前变换状态
+                this.ctx.save();
+                
+                // 应用画布偏移
+                this.ctx.translate(this.offsetX, this.offsetY);
+                
+                const size = this.density;
+                const height = size * Math.sqrt(3) / 2;
+                
+                // 绘制网格
+                this.ctx.strokeStyle = '#666';
+                this.ctx.lineWidth = 1;
+                
+                // 计算需要绘制的范围（考虑偏移）
+                const startRow = Math.floor(-this.offsetY / height) - 2;
+                const endRow = Math.ceil((this.canvas.height - this.offsetY) / height) + 2;
+                const startCol = Math.floor(-this.offsetX / (size / 2)) - 2;
+                const endCol = Math.ceil((this.canvas.width - this.offsetX) / (size / 2)) + 2;
+                
+                for (let row = startRow; row < endRow; row++) {
+                    for (let col = startCol; col < endCol; col++) {
+                        this.drawTriangle(col, row, size);
+                    }
+                }
+                
+                // 恢复变换状态
+                this.ctx.restore();
+            }
+            
+            drawTriangle(col, row, size) {
+                const height = size * Math.sqrt(3) / 2;
+                
+                // 计算三角形的位置
+                // 每行高度为 height，每列宽度为 size/2
+                const x = col * (size / 2);
+                const y = row * height;
+                
+                // 确定三角形方向：奇偶行交替，奇偶列交替
+                const isUpward = (row + col) % 2 === 0;
+                
+                const triangleId = `${isUpward ? 'up' : 'down'}_${col}_${row}`;
+                let points;
+                
+                if (isUpward) {
+                    // 上三角形（顶点向上）
+                    points = [
+                        [x, y + height],           // 左下
+                        [x + size/2, y],           // 顶点
+                        [x + size, y + height]     // 右下
+                    ];
+                } else {
+                    // 下三角形（顶点向下）
+                    points = [
+                        [x, y],                    // 左上
+                        [x + size, y],             // 右上
+                        [x + size/2, y + height]   // 底点
+                    ];
+                }
+                
+                this.drawTriangleShape(points, triangleId);
+            }
+            
+            drawTriangleShape(points, triangleId) {
+                this.ctx.beginPath();
+                this.ctx.moveTo(points[0][0], points[0][1]);
+                this.ctx.lineTo(points[1][0], points[1][1]);
+                this.ctx.lineTo(points[2][0], points[2][1]);
+                this.ctx.closePath();
+                
+                if (this.filledTriangles.has(triangleId)) {
+                    this.ctx.fillStyle = '#333';
+                    this.ctx.fill();
+                }
+                
+                this.ctx.stroke();
+            }
+            
+
+            
+            handleMouseDown(e) {
+                const rect = this.canvas.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                
+                this.lastX = x;
+                this.lastY = y;
+                this.dragStartX = x;
+                this.dragStartY = y;
+                
+                if (e.button === 0) { // 左键
+                    this.isPainting = true;
+                    this.paintedInCurrentDrag.clear(); // 清空当前拖拽记录
+                    this.handlePaint(x, y);
+                } else if (e.button === 1) { // 中键
+                    this.isDragging = true;
+                    this.canvas.style.cursor = 'grabbing';
+                    e.preventDefault(); // 防止中键的默认行为
+                }
+            }
+            
+            handleMouseMove(e) {
+                if (!this.isDragging && !this.isPainting) return;
+                
+                const rect = this.canvas.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                
+                if (this.isDragging) {
+                    // 右键拖拽移动画布
+                    const deltaX = x - this.lastX;
+                    const deltaY = y - this.lastY;
+                    
+                    this.offsetX += deltaX;
+                    this.offsetY += deltaY;
+                    
+                    this.draw();
+                } else if (this.isPainting) {
+                    // 左键拖拽涂黑
+                    this.handlePaint(x, y);
+                }
+                
+                this.lastX = x;
+                this.lastY = y;
+            }
+            
+            handleMouseUp(e) {
+                this.isDragging = false;
+                this.isPainting = false;
+                this.paintedInCurrentDrag.clear(); // 清空当前拖拽记录
+                this.canvas.style.cursor = 'crosshair';
+            }
+            
+            handlePaint(x, y) {
+                const triangleId = this.getTriangleAt(x, y);
+                if (triangleId) {
+                    // 如果在当前拖拽中已经处理过这个三角形，则跳过
+                    if (this.paintedInCurrentDrag.has(triangleId)) {
+                        return;
+                    }
+                    
+                    // 记录已处理的三角形
+                    this.paintedInCurrentDrag.add(triangleId);
+                    
+                    if (this.filledTriangles.has(triangleId)) {
+                        // 如果已经涂黑，则取消涂黑
+                        this.filledTriangles.delete(triangleId);
+                    } else {
+                        // 如果未涂黑，则涂黑
+                        this.filledTriangles.add(triangleId);
+                    }
+                    this.draw();
+                }
+            }
+            
+            getTriangleAt(x, y) {
+                const size = this.density;
+                const height = size * Math.sqrt(3) / 2;
+                
+                // 转换为画布坐标（考虑偏移）
+                const canvasX = x - this.offsetX;
+                const canvasY = y - this.offsetY;
+                
+                // 确定点击位置所在的大致行列
+                const row = Math.floor(canvasY / height);
+                const col = Math.floor(canvasX / (size / 2));
+                
+                // 检查周围的几个三角形
+                for (let r = row - 1; r <= row + 1; r++) {
+                    for (let c = col - 1; c <= col + 1; c++) {
+                        const trianglePoints = this.getTrianglePointsForPosition(c, r, size);
+                        if (trianglePoints) {
+                            const triangleId = trianglePoints.id;
+                            if (this.isPointInTriangle(canvasX, canvasY, trianglePoints.points)) {
+                                return triangleId;
+                            }
+                        }
+                    }
+                }
+                
+                return null;
+            }
+            
+            getTrianglePointsForPosition(col, row, size) {
+                const height = size * Math.sqrt(3) / 2;
+                
+                const x = col * (size / 2);
+                const y = row * height;
+                const isUpward = (row + col) % 2 === 0;
+                
+                const triangleId = `${isUpward ? 'up' : 'down'}_${col}_${row}`;
+                let points;
+                
+                if (isUpward) {
+                    points = [
+                        [x, y + height],
+                        [x + size/2, y],
+                        [x + size, y + height]
+                    ];
+                } else {
+                    points = [
+                        [x, y],
+                        [x + size, y],
+                        [x + size/2, y + height]
+                    ];
+                }
+                
+                return { id: triangleId, points: points };
+            }
+            
+            isPointInTriangle(px, py, triangle) {
+                const [x1, y1] = triangle[0];
+                const [x2, y2] = triangle[1];
+                const [x3, y3] = triangle[2];
+                
+                const denominator = ((y2 - y3) * (x1 - x3) + (x3 - x2) * (y1 - y3));
+                if (Math.abs(denominator) < 1e-10) return false;
+                
+                const a = ((y2 - y3) * (px - x3) + (x3 - x2) * (py - y3)) / denominator;
+                const b = ((y3 - y1) * (px - x3) + (x1 - x3) * (py - y3)) / denominator;
+                const c = 1 - a - b;
+                
+                return a >= 0 && b >= 0 && c >= 0;
+            }
+            
+            exportSVG() {
+                const size = this.density;
+                const height = size * Math.sqrt(3) / 2;
+                
+                // 获取当前可视区域内的填充三角形
+                const visibleTriangles = new Set();
+                const canvasWidth = this.canvas.width;
+                const canvasHeight = this.canvas.height;
+                
+                this.filledTriangles.forEach(triangleId => {
+                    const points = this.getTrianglePoints(triangleId, size);
+                    if (points) {
+                        // 将三角形坐标转换为屏幕坐标（考虑偏移）
+                        const screenPoints = points.map(p => [p[0] + this.offsetX, p[1] + this.offsetY]);
+                        
+                        // 检查三角形是否与可视区域相交
+                        const isVisible = screenPoints.some(p => 
+                            p[0] >= -size && p[0] <= canvasWidth + size && 
+                            p[1] >= -size && p[1] <= canvasHeight + size
+                        );
+                        
+                        if (isVisible) {
+                            visibleTriangles.add(triangleId);
+                        }
+                    }
+                });
+                
+                if (visibleTriangles.size === 0) {
+                    alert('当前可视区域内没有涂黑的三角形');
+                    return;
+                }
+                
+                let svgContent = `<svg xmlns="http://www.w3.org/2000/svg" width="${canvasWidth}" height="${canvasHeight}" viewBox="0 0 ${canvasWidth} ${canvasHeight}">\n`;
+                
+                // 只导出实际涂黑的三角形，不显示边界线
+                visibleTriangles.forEach(triangleId => {
+                    const points = this.getTrianglePoints(triangleId, size);
+                    if (points) {
+                        // 转换为屏幕坐标
+                        const screenPoints = points.map(p => [p[0] + this.offsetX, p[1] + this.offsetY]);
+                        const pointsStr = screenPoints.map(p => `${p[0]},${p[1]}`).join(' ');
+                        svgContent += `  <polygon points="${pointsStr}" fill="#333" stroke="none" />\n`;
+                    }
+                });
+                
+                svgContent += '</svg>';
+                
+                // 下载SVG文件
+                const blob = new Blob([svgContent], { type: 'image/svg+xml' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'triangle-grid.svg';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            }
+            
+
+            
+            getTrianglePoints(triangleId, size) {
+                const [type, col, row] = triangleId.split('_');
+                const colNum = parseInt(col);
+                const rowNum = parseInt(row);
+                const height = size * Math.sqrt(3) / 2;
+                
+                const x = colNum * (size / 2);
+                const y = rowNum * height;
+                
+                if (type === 'up') {
+                    return [
+                        [x, y + height],
+                        [x + size/2, y],
+                        [x + size, y + height]
+                    ];
+                } else if (type === 'down') {
+                    return [
+                        [x, y],
+                        [x + size, y],
+                        [x + size/2, y + height]
+                    ];
+                }
+                return null;
+            }
+        }
+        
+        // 初始化应用
+        document.addEventListener('DOMContentLoaded', () => {
+            new TriangleGrid('gridCanvas');
+        });
+    </script>
+</body>
+</html>
