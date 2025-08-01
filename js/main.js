@@ -1800,6 +1800,11 @@ document.addEventListener("DOMContentLoaded", function () {
     anzhiyu.addEventListenerConsoleMusicList(false);
     anzhiyu.initPaginationObserver();
 
+    // 初始化背景切换按钮
+    if (window.AuroraPerformanceOptimizer && typeof window.AuroraPerformanceOptimizer.initBackgroundToggle === 'function') {
+      window.AuroraPerformanceOptimizer.initBackgroundToggle();
+    }
+
     setTimeout(() => {
       setInputFocusListener();
       if (typeof addFriendLinksInFooter === "function") {
