@@ -121,18 +121,45 @@
     });
   }
 
-  // 页面加载完成后初始化
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', function() {
+  /**
+   * 初始化所有功能
+   */
+  function initAll() {
+    try {
       initPerformanceOptimizer();
       setupPerformanceMonitoring();
       initBackgroundToggle();
-    });
-  } else {
-    initPerformanceOptimizer();
-    setupPerformanceMonitoring();
-    initBackgroundToggle();
+      console.log('背景设置初始化完成');
+    } catch (error) {
+      console.error('背景设置初始化失败:', error);
+    }
   }
+
+  // 页面加载完成后初始化
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initAll);
+  } else {
+    initAll();
+  }
+
+  // 添加PJAX事件监听，确保页面切换时重新初始化
+  document.addEventListener('pjax:complete', function() {
+    console.log('PJAX页面切换完成，重新初始化背景设置');
+    // 延迟一点时间确保DOM完全更新
+    setTimeout(initAll, 100);
+  });
+
+  // 也监听pjax:success事件作为备用
+  document.addEventListener('pjax:success', function() {
+    console.log('PJAX成功，重新初始化背景设置');
+    setTimeout(initAll, 50);
+  });
+
+  // 监听pjax:end事件（AnZhiYu主题可能使用这个事件）
+  document.addEventListener('pjax:end', function() {
+    console.log('PJAX结束，重新初始化背景设置');
+    setTimeout(initAll, 50);
+  });
 
   /**
    * 切换背景模式

@@ -199,15 +199,53 @@ document.addEventListener("pjax:success", e => {
   const newPeoplecanvasEl = document.getElementById("peoplecanvas");
   if (newPeoplecanvasEl) {
     peoplecanvasEl = newPeoplecanvasEl;
-    (ctx = peoplecanvasEl ? peoplecanvasEl.getContext("2d") : undefined), window.removeEventListener("resize", resize);
+    ctx = peoplecanvasEl ? peoplecanvasEl.getContext("2d") : undefined;
+    
+    // 清理之前的事件监听器和动画
+    window.removeEventListener("resize", resize);
     gsap.ticker.remove(render);
-    setTimeout(() => {
-      if (!peoplecanvasEl) return;
-      if (peopleConfig.background_image) {
-        document.documentElement.style.setProperty('--peoplecanvas-bg-image', `url(${peopleConfig.background_image})`);
-      }
-      resize(), gsap.ticker.add(render), window.addEventListener("resize", resize);
-    }, 300);
+    
+    // 重新选择随机图片（如果配置了多张图片）
+    if (Array.isArray(GLOBAL_CONFIG.peoplecanvas.img)) {
+      peopleConfig.src = GLOBAL_CONFIG.peoplecanvas.img[Math.floor(Math.random() * GLOBAL_CONFIG.peoplecanvas.img.length)];
+    }
+    
+    // 重新加载图片并初始化
+    const newImg = document.createElement("img");
+    newImg.onload = function() {
+      // 更新全局图片引用
+      img.src = newImg.src;
+      
+      setTimeout(() => {
+        if (!peoplecanvasEl) return;
+        
+        // 设置背景图片
+        if (peopleConfig.background_image) {
+          document.documentElement.style.setProperty('--peoplecanvas-bg-image', `url(${peopleConfig.background_image})`);
+        }
+        
+        // 清空并重新创建人物精灵图
+        allPeeps.length = 0;
+        availablePeeps.length = 0;
+        crowd.length = 0;
+        
+        // 重新创建人物精灵图
+        createPeeps();
+        
+        // 重新初始化
+        resize();
+        gsap.ticker.add(render);
+        window.addEventListener("resize", resize);
+        
+        console.log('人潮汹涌模块重新初始化完成');
+      }, 300);
+    };
+    
+    newImg.onerror = function() {
+      console.error('人潮汹涌图片加载失败:', peopleConfig.src);
+    };
+    
+    newImg.src = peopleConfig.src;
   }
 });
 
