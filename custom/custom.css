@@ -57,13 +57,13 @@
     rgba(232, 121, 249, 0.4) 100%
   );
   
-  /* 默认使用静态背景以确保兼容性 */
-  background-image: var(--stripes-static), var(--rainbow-static);
+  /* 默认使用白天模式静态背景以确保兼容性 */
+  background-image: var(--stripes-static-light), var(--rainbow-static-light);
   background-size: 100% 100%;
   background-position: 50% 50%;
   
   /* 减少模糊强度以提升性能 */
-  filter: blur(5px) invert(1);
+  filter: blur(10px)invert(1);
   
   /* 图层蒙版使用径向渐变 */
   mask-image: radial-gradient(ellipse at 100% 0%, black 40%, transparent 70%);
@@ -165,6 +165,9 @@
     #4b5ce3 75%,
     #6e33ff 100%
   );
+  
+  /* 暗色模式下使用暗色静态背景，覆盖默认的白天模式背景 */
+  background-image: var(--stripes-static), var(--rainbow-static);
   
   /* 暗色模式下移除颜色反转，保持原色，减少模糊强度 */
   filter: blur(5px);

@@ -26,6 +26,24 @@
   };
 
   /**
+   * 检测设备类型
+   */
+  function detectDeviceType() {
+    const userAgent = navigator.userAgent.toLowerCase();
+    const isMobile = /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(userAgent);
+    const isTablet = /ipad|android(?!.*mobile)/i.test(userAgent) || 
+                     (window.screen.width >= 768 && window.screen.width <= 1024 && 'ontouchstart' in window);
+    const isDesktop = !isMobile && !isTablet;
+    
+    return {
+      isMobile,
+      isTablet,
+      isDesktop,
+      deviceType: isMobile ? 'mobile' : (isTablet ? 'tablet' : 'desktop')
+    };
+  }
+
+  /**
    * 检测设备硬件信息
    */
   function detectHardware() {
@@ -115,6 +133,7 @@
    * 计算性能评分
    */
   async function calculatePerformanceScore() {
+    const deviceType = detectDeviceType();
     const hardware = detectHardware();
     const features = detectBrowserFeatures();
     const preferences = detectUserPreferences();
@@ -122,25 +141,32 @@
 
     let score = 0;
 
-    // 硬件评分 (40%)
-    score += Math.min(hardware.cores / 8, 1) * 15;
-    score += Math.min(hardware.memory / 8, 1) * 15;
-    score += Math.min((hardware.screenWidth * hardware.screenHeight) / (1920 * 1080), 1) * 10;
+    // 设备类型检测：非PC设备默认使用静态模式
+    if (!deviceType.isDesktop) {
+      score = 20; // 移动设备和平板默认静态模式
+    } else {
+      // PC设备进行正常的性能评分
+      // 硬件评分 (40%)
+      score += Math.min(hardware.cores / 8, 1) * 15;
+      score += Math.min(hardware.memory / 8, 1) * 15;
+      score += Math.min((hardware.screenWidth * hardware.screenHeight) / (1920 * 1080), 1) * 10;
 
-    // 浏览器特性评分 (30%)
-    score += features.webgl ? 10 : 0;
-    score += features.webgl2 ? 5 : 0;
-    score += features.cssTransforms3d ? 10 : 0;
-    score += features.willChange ? 5 : 0;
+      // 浏览器特性评分 (30%)
+      score += features.webgl ? 10 : 0;
+      score += features.webgl2 ? 5 : 0;
+      score += features.cssTransforms3d ? 10 : 0;
+      score += features.willChange ? 5 : 0;
 
-    // 性能基准测试评分 (30%)
-    score += Math.min(benchmark / 1000, 1) * 30;
+      // 性能基准测试评分 (30%)
+      score += Math.min(benchmark / 1000, 1) * 30;
+    }
 
     // 用户偏好调整
     if (preferences.reducedMotion) {
       score = 0; // 用户明确要求减少动画
     }
 
+    // 用户手动选择优先级最高
     if (preferences.userChoice) {
       switch (preferences.userChoice) {
         case 'high':
@@ -417,6 +443,9 @@
     const initButton = () => {
       const button = document.getElementById('switch-background');
       if (button) {
+        // 移除之前的事件监听器（如果存在）
+        button.removeEventListener('click', toggleBackgroundMode);
+        // 添加新的事件监听器
         button.addEventListener('click', toggleBackgroundMode);
         
         // 根据当前模式更新按钮状态
@@ -433,15 +462,31 @@
         
         updateButtonState();
         
+        // 清除之前的观察器（如果存在）
+        if (button._backgroundObserver) {
+          button._backgroundObserver.disconnect();
+        }
+        
         // 监听性能级别变化
         const observer = new MutationObserver(updateButtonState);
         observer.observe(document.body, {
           attributes: true,
           attributeFilter: ['class']
         });
+        
+        // 将观察器保存到按钮元素上，以便后续清理
+        button._backgroundObserver = observer;
+        
+        console.log('背景切换按钮已重新初始化');
       } else {
-        // 如果按钮还没有加载，延迟重试
-        setTimeout(initButton, 100);
+        // 如果按钮还没有加载，延迟重试，最多重试10次
+        if (!initButton.retryCount) initButton.retryCount = 0;
+        if (initButton.retryCount < 10) {
+          initButton.retryCount++;
+          setTimeout(initButton, 200);
+        } else {
+          console.warn('无法找到背景切换按钮 #switch-background');
+        }
       }
     };
     
