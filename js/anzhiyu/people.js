@@ -188,66 +188,122 @@ let ctx = peoplecanvasEl ? peoplecanvasEl.getContext("2d") : undefined,
   availablePeeps = [],
   crowd = [];
 
-function init() {
-  if (!peoplecanvasEl) return;
-  if (peopleConfig.background_image) {
-    document.documentElement.style.setProperty('--peoplecanvas-bg-image', `url(${peopleConfig.background_image})`);
-  }
-  createPeeps(), resize(), gsap.ticker.add(render), window.addEventListener("resize", resize);
-}
+// 添加全局变量来跟踪初始化状态
+let isInitializing = false;
+let currentImageSrc = '';
+
+// 修改PJAX事件监听器
 document.addEventListener("pjax:success", e => {
   const newPeoplecanvasEl = document.getElementById("peoplecanvas");
-  if (newPeoplecanvasEl) {
+  if (newPeoplecanvasEl && !isInitializing) {
+    isInitializing = true;
+    
+    // 完全清理之前的状态
+    cleanupPeopleCanvas();
+    
     peoplecanvasEl = newPeoplecanvasEl;
     ctx = peoplecanvasEl ? peoplecanvasEl.getContext("2d") : undefined;
     
-    // 清理之前的事件监听器和动画
-    window.removeEventListener("resize", resize);
-    gsap.ticker.remove(render);
-    
     // 重新选择随机图片（如果配置了多张图片）
+    let newImageSrc;
     if (Array.isArray(GLOBAL_CONFIG.peoplecanvas.img)) {
-      peopleConfig.src = GLOBAL_CONFIG.peoplecanvas.img[Math.floor(Math.random() * GLOBAL_CONFIG.peoplecanvas.img.length)];
+      newImageSrc = GLOBAL_CONFIG.peoplecanvas.img[Math.floor(Math.random() * GLOBAL_CONFIG.peoplecanvas.img.length)];
+    } else {
+      newImageSrc = GLOBAL_CONFIG.peoplecanvas.img;
     }
     
-    // 重新加载图片并初始化
-    const newImg = document.createElement("img");
-    newImg.onload = function() {
-      // 更新全局图片引用
-      img.src = newImg.src;
+    // 只有当图片真的改变时才重新加载
+    if (newImageSrc !== currentImageSrc) {
+      currentImageSrc = newImageSrc;
+      peopleConfig.src = newImageSrc;
       
+      // 创建新的图片对象
+      const newImg = document.createElement("img");
+      newImg.onload = function() {
+        // 替换全局图片引用
+        img.src = newImg.src;
+        img.onload = null; // 清除旧的onload
+        
+        setTimeout(() => {
+          if (!peoplecanvasEl || !isInitializing) return;
+          
+          initializePeopleCanvas();
+          isInitializing = false;
+          
+          console.log('人潮汹涌模块重新初始化完成');
+        }, 100);
+      };
+      
+      newImg.onerror = function() {
+        console.error('人潮汹涌图片加载失败:', newImageSrc);
+        isInitializing = false;
+      };
+      
+      newImg.src = newImageSrc;
+    } else {
+      // 图片相同，直接重新初始化
       setTimeout(() => {
-        if (!peoplecanvasEl) return;
+        if (!peoplecanvasEl || !isInitializing) return;
         
-        // 设置背景图片
-        if (peopleConfig.background_image) {
-          document.documentElement.style.setProperty('--peoplecanvas-bg-image', `url(${peopleConfig.background_image})`);
-        }
+        initializePeopleCanvas();
+        isInitializing = false;
         
-        // 清空并重新创建人物精灵图
-        allPeeps.length = 0;
-        availablePeeps.length = 0;
-        crowd.length = 0;
-        
-        // 重新创建人物精灵图
-        createPeeps();
-        
-        // 重新初始化
-        resize();
-        gsap.ticker.add(render);
-        window.addEventListener("resize", resize);
-        
-        console.log('人潮汹涌模块重新初始化完成');
-      }, 300);
-    };
-    
-    newImg.onerror = function() {
-      console.error('人潮汹涌图片加载失败:', peopleConfig.src);
-    };
-    
-    newImg.src = peopleConfig.src;
+        console.log('人潮汹涌模块重新初始化完成（相同图片）');
+      }, 100);
+    }
   }
 });
+
+// 新增清理函数
+function cleanupPeopleCanvas() {
+  // 停止所有动画
+  crowd.forEach(function (peep) {
+    if (peep.walk) {
+      peep.walk.kill();
+      peep.walk = null;
+    }
+  });
+  
+  // 移除事件监听器
+  window.removeEventListener("resize", resize);
+  gsap.ticker.remove(render);
+  
+  // 清空所有数组
+  crowd.length = 0;
+  availablePeeps.length = 0;
+  allPeeps.length = 0;
+  
+  // 清空画布
+  if (peoplecanvasEl && ctx) {
+    ctx.clearRect(0, 0, peoplecanvasEl.width, peoplecanvasEl.height);
+  }
+}
+
+// 新增初始化函数
+function initializePeopleCanvas() {
+  if (!peoplecanvasEl) return;
+  
+  // 设置背景图片
+  if (peopleConfig.background_image) {
+    document.documentElement.style.setProperty('--peoplecanvas-bg-image', `url(${peopleConfig.background_image})`);
+  }
+  
+  // 重新创建人物精灵图
+  createPeeps();
+  
+  // 重新初始化
+  resize();
+  gsap.ticker.add(render);
+  window.addEventListener("resize", resize);
+}
+
+// 修改原有的init函数
+function init() {
+  if (!peoplecanvasEl || isInitializing) return;
+  
+  currentImageSrc = peopleConfig.src;
+  initializePeopleCanvas();
+}
 
 function createPeeps() {
   for (
