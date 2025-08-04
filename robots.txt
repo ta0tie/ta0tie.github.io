@@ -1,0 +1,3 @@
+User-agent: *
+Disallow:
+Sitemap: https://www.ta0t1e.com/sitemap.xml
