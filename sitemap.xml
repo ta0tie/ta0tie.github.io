@@ -2,18 +2,18 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
-    <loc>https://www.ta0t1e.com/posts/aurorabackground.html</loc>
+    <loc>https://www.ta0t1e.com/html/index.html</loc>
     
-    <lastmod>2025-08-01</lastmod>
+    <lastmod>2025-08-06</lastmod>
     
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   
   <url>
-    <loc>https://www.ta0t1e.com/html/index.html</loc>
+    <loc>https://www.ta0t1e.com/posts/aurorabackground.html</loc>
     
-    <lastmod>2025-07-31</lastmod>
+    <lastmod>2025-08-01</lastmod>
     
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
@@ -76,7 +76,7 @@
 
   <url>
     <loc>https://www.ta0t1e.com/</loc>
-    <lastmod>2025-08-04</lastmod>
+    <lastmod>2025-08-06</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
   </url>
@@ -84,21 +84,21 @@
   
   <url>
     <loc>https://www.ta0t1e.com/tags/anzhiyu/</loc>
-    <lastmod>2025-08-04</lastmod>
+    <lastmod>2025-08-06</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
     <loc>https://www.ta0t1e.com/tags/test/</loc>
-    <lastmod>2025-08-04</lastmod>
+    <lastmod>2025-08-06</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
     <loc>https://www.ta0t1e.com/tags/hello/</loc>
-    <lastmod>2025-08-04</lastmod>
+    <lastmod>2025-08-06</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
@@ -107,14 +107,14 @@
   
   <url>
     <loc>https://www.ta0t1e.com/categories/anzhiyu/</loc>
-    <lastmod>2025-08-04</lastmod>
+    <lastmod>2025-08-06</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
     <loc>https://www.ta0t1e.com/categories/daily-life/</loc>
-    <lastmod>2025-08-04</lastmod>
+    <lastmod>2025-08-06</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
